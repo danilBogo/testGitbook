@@ -1,0 +1,33 @@
+name: .NET
+
+on:
+  push:
+    branches: [ master, testcov ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Codecov
+      uses: codecov/codecov-action@v2.1.0
+      with:
+        file: "codecov.xml"
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: test
+      run: dotnet test --logger "trx;LogFileName=test-results.trx"
+    - uses: actions/upload-artifact@v2
+      if: success() || failure()
+      with:
+        name: test-results
+        path: HomeWork*/Hw*Tests/TestResults/*.trx
